@@ -21,10 +21,11 @@ public class JsonBehaviour : MonoBehaviour
         {
             string read = System.IO.File.ReadAllText(path);
             JsonUtility.FromJsonOverwrite(read, DB);
-            foreach (var item in DB.saveData)
+            /*foreach (var item in DB.saveData)
             {
                 addBehaviour.AddOnAppOpen(item);
-            }
+            }*/
+            addBehaviour.AddOnAppOpen();
         }
         else
         {
@@ -32,4 +33,5 @@ public class JsonBehaviour : MonoBehaviour
             PlayerPrefs.Save();
         }
     }
+    //public void ReadDaysList()
 }

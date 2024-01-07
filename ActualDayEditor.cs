@@ -11,16 +11,18 @@ public class ActualDayEditor : FishForm
     [SerializeField] DataBase DB;
     [SerializeField] JsonBehaviour Json;
     [SerializeField] EditForm form;
-    [SerializeField] GameObject addFishTab;
+    [SerializeField] public GameObject addFishTab;
     [SerializeField] ReadSaveInGame readSaveInGame;
     [SerializeField] public GameObject plus;
     [SerializeField] public GameObject backArrow;
     [SerializeField] TMP_Text lastUpdate;
-    [SerializeField] GameObject mainSide;
+    [SerializeField] public GameObject mainSide;
     [SerializeField] GameObject endDayTab;
+    [SerializeField] GameObject editButton;
     int counter;
     [SerializeField] TMP_InputField[] endTime = new TMP_InputField[2];
     bool reloadTime = true;
+    [SerializeField] public GameObject trash;
 
     void Start()
     {
@@ -53,6 +55,9 @@ public class ActualDayEditor : FishForm
             PlayerPrefs.SetInt("id", idTicket);
             PlayerPrefs.Save();
         }
+        editButton.SetActive(false);
+        trash.SetActive(false);
+        readSaveInGame.actualEdit = idTicket;
         readSaveInGame.plus.SetActive(false);
         plus.SetActive(false);
         backArrow.SetActive(true);
@@ -63,6 +68,10 @@ public class ActualDayEditor : FishForm
         form.weather.value = (int)info.editableData[info.editableData.Count - 1].weather;
         form.editHour.text = System.DateTime.Now.ToString("HH").PadLeft(2,'0');
         form.editMinute.text = System.DateTime.Now.ToString("mm").PadLeft(2, '0');
+    }
+    public void ChangeActualEdit()
+    {
+        readSaveInGame.actualEdit = PlayerPrefs.GetInt("id");
     }
     //update data in ticket
     public void ChangeTemperature()
@@ -95,23 +104,39 @@ public class ActualDayEditor : FishForm
     }
     public void ChangeEditHour()
     {
-        int hour = int.Parse(form.editHour.text);
-        int minute = int.Parse(form.editMinute.text);
-        if (hour < 0 || hour > 23)
+        if (form.editHour.text.Length > 0 && form.editMinute.text.Length > 0)
         {
-            form.editHour.text = System.DateTime.Now.ToString("HH").PadLeft(2,'0');
+            if (form.editHour.text[0] != '-' && form.editMinute.text[0] != '-')
+            {
+                int hour = int.Parse(form.editHour.text);
+                int minute = int.Parse(form.editMinute.text);
+                if (hour < 0 || hour > 23)
+                {
+                    form.editHour.text = System.DateTime.Now.ToString("HH").PadLeft(2, '0');
+                }
+                else
+                {
+                    form.editHour.text = form.editHour.text.ToString().PadLeft(2, '0');
+                }
+                if (minute < 0 || minute > 59)
+                {
+                    form.editMinute.text = System.DateTime.Now.ToString("mm").PadLeft(2, '0');
+                }
+                else
+                {
+                    form.editMinute.text = form.editMinute.text.ToString().PadLeft(2, '0');
+                }
+            }
+            else
+            {
+                form.editHour.text = System.DateTime.Now.ToString("HH").PadLeft(2, '0');
+                form.editMinute.text = System.DateTime.Now.ToString("mm").PadLeft(2, '0');
+            }
         }
         else
         {
-            form.editHour.text = form.editHour.text.ToString().PadLeft(2, '0');
-        }
-        if (minute < 0 || minute > 59)
-        {
+            form.editHour.text = System.DateTime.Now.ToString("HH").PadLeft(2, '0');
             form.editMinute.text = System.DateTime.Now.ToString("mm").PadLeft(2, '0');
-        }
-        else
-        {
-            form.editMinute.text = form.editMinute.text.ToString().PadLeft(2, '0');
         }
     }
     public void StopReloadTime()
@@ -185,6 +210,9 @@ public class ActualDayEditor : FishForm
             DB.saveData[PlayerPrefs.GetInt("id")].editableData.Add(data);
             Json.SaveData(DB);
             lastUpdate.text = "Ostatnia aktualizacja: " + data.editHour.ToString().PadLeft(2, '0') + ":" + data.editMinute.ToString().PadLeft(2, '0');
+            //clear
+            form.temperature.GetComponentInParent<Image>().color = color;
+            form.windValue.GetComponentInParent<Image>().color = color;
         }
         else
         {
@@ -233,36 +261,76 @@ public class ActualDayEditor : FishForm
     {
         if(length.text.Length > 0)
         {
-            if(int.Parse(length.text) <= 0)
+            if (length.text[0] != '-')
+            {
+                if (int.Parse(length.text) <= 0)
+                {
+                    length.text = "";
+                }
+            }
+            else
             {
                 length.text = "";
             }
         }
+        else
+        {
+            length.text = "";
+        }
     }
     public void ChangeWeight()
     {
-        if (weigth.text.Length > 0)
+        weight.text = weight.text.Replace('.', ',');
+        if (weight.text[0] == ',')
         {
-            if (int.Parse(weigth.text) <= 0)
+            weight.text = "0" + weight.text;
+        }
+        if (weight.text.Length > 0)
+        {
+            if (weight.text[0] != '-')
             {
-                weigth.text = "";
+                if (float.Parse(weight.text) <= 0)
+                {
+                    weight.text = "";
+                }
             }
+            else
+            {
+                weight.text = "";
+            }
+        }
+        else
+        {
+            weight.text = "";
         }
     }
     public void ChangeTimeChatch()
     {
-        if (hour.text.Length > 0 || minute.text.Length > 0)
+        if (hour.text.Length > 0 && minute.text.Length > 0)
         {
-            if (int.Parse(hour.text) < 0 || int.Parse(minute.text) < 0 || int.Parse(hour.text) > 23 || int.Parse(minute.text) > 59)
+            if (hour.text[0] != '-' && minute.text[0] != '-')
+            {
+                if (int.Parse(hour.text) < 0 || int.Parse(minute.text) < 0 || int.Parse(hour.text) > 23 || int.Parse(minute.text) > 59)
+                {
+                    hour.text = System.DateTime.Now.ToString("HH").PadLeft(2, '0');
+                    minute.text = System.DateTime.Now.ToString("mm").PadLeft(2, '0');
+                }
+                else
+                {
+                    hour.text = hour.text.ToString().PadLeft(2, '0');
+                    minute.text = minute.text.ToString().PadLeft(2, '0');
+                }
+            }
+            else
             {
                 hour.text = System.DateTime.Now.ToString("HH").PadLeft(2, '0');
                 minute.text = System.DateTime.Now.ToString("mm").PadLeft(2, '0');
             }
-            else
-            {
-                hour.text = hour.text.ToString().PadLeft(2, '0');
-                minute.text = minute.text.ToString().PadLeft(2, '0');
-            }
+        }
+        else
+        {
+            hour.text = System.DateTime.Now.ToString("HH").PadLeft(2, '0');
+            minute.text = System.DateTime.Now.ToString("mm").PadLeft(2, '0');
         }
     }
     public void AddFish()
@@ -277,9 +345,9 @@ public class ActualDayEditor : FishForm
             {
                 data.length = int.Parse(length.text);
             }
-            if (weigth.text.Length > 0)
+            if (weight.text.Length > 0)
             {
-                data.weigth = float.Parse(weigth.text);
+                data.weight = float.Parse(weight.text);
             }
             data.bait = bait.text;
             data.groundBait = groundBait.text;
@@ -313,7 +381,7 @@ public class ActualDayEditor : FishForm
             mainSide.transform.Find("ID_" + PlayerPrefs.GetInt("id")).Find("FishCount").GetComponent<TMP_Text>().text = prefab;
             //clear
             length.text = "";
-            weigth.text = "";
+            weight.text = "";
             //exit
             addFishTab.SetActive(false);
         }
@@ -340,9 +408,12 @@ public class ActualDayEditor : FishForm
     }
     public void CancelAddFish()
     {
+        var color = new Color(0.4117647f, 0.6039216f, 0.5607843f);
         length.text = "";
-        weigth.text = "";
+        weight.text = "";
         addFishTab.SetActive(false);
+        fish.GetComponent<Image>().color = color;
+        bait.GetComponent<Image>().color = color;
     }
     //end day
     public void EndDayOpen()
@@ -362,6 +433,8 @@ public class ActualDayEditor : FishForm
         PlayerPrefs.SetInt("bool", 0);
         PlayerPrefs.DeleteKey("id");
         PlayerPrefs.Save();
+        editButton.SetActive(true);
+        trash.SetActive(true);
         readSaveInGame.plus.SetActive(true);
         endDayTab.SetActive(false);
         editDay.SetActive(false);
@@ -411,7 +484,7 @@ public class FishForm : MonoBehaviour
 {
     public TMP_InputField fish;
     public TMP_InputField length;
-    public TMP_InputField weigth;
+    public TMP_InputField weight;
     public TMP_InputField bait;
     public TMP_InputField groundBait;
     public TMP_InputField hour;

@@ -108,7 +108,7 @@ public class NewFish
 {
     [SerializeField] public string fish;
     [SerializeField] public int length;
-    [SerializeField] public float weigth;
+    [SerializeField] public float weight;
     [SerializeField] public string bait;
     [SerializeField] public string groundBait;
     [SerializeField] public int hour;

@@ -10,4 +10,8 @@ public class ScriptInPrefab : MonoBehaviour
     {
         readSave.OpenSaveDayTab(id);
     }
+    public void OpenFish()
+    {
+        readSave.OpenFish(id);
+    }
 }
